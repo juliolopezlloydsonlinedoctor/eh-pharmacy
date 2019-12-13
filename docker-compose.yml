@@ -1,0 +1,11 @@
+version: '2'
+services:
+  booking:
+    image: gcr.io/$PROJECT_ID/eh-pharmacy:latest
+    container_name: pharmacy
+    ports:
+      - "80:80"
+networks:
+  default:
+    external:
+      name: cloudbuild

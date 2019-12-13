@@ -1,0 +1,32 @@
+steps:
+  - name: 'maven:3-jdk-8'
+    id: Package
+    entrypoint: 'mvn'
+    args: ['package']
+
+  - name: 'gcr.io/cloud-builders/docker'
+    id: Build
+    args: ['build', '--tag=gcr.io/$PROJECT_ID/eh-pharmacy:latest', '.']
+
+  - name: 'docker/compose:1.15.0'
+    id: Compose Up
+    args: ['up','-d']
+    env:
+      - 'PROJECT_ID=$PROJECT_ID'
+
+  - name: 'maven:3-jdk-8'
+    id: Install
+    entrypoint: 'mvn'
+    args: ['install']
+
+  - name: 'docker/compose:1.15.0'
+    id: Compose Down
+    args: ['down']
+    env:
+     - 'PROJECT_ID=$PROJECT_ID'
+
+  - name: 'gcr.io/cloud-builders/gsutil'
+    id: Manifests
+    args: ['cp', '-r', 'eh-booking-gcp/*', 'gs://$PROJECT_ID-kubernetes-manifests']
+images: ['gcr.io/$PROJECT_ID/eh-pharmacy:latest']
+timeout: 1200s
